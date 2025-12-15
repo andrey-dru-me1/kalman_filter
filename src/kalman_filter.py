@@ -82,7 +82,10 @@ class KalmanFilter:
             xp[i] = F @ xe[i - 1] + G @ u[i - 1]
             Pp[i] = F @ Pe[i - 1] @ F.T + Q
             # Update
-            K = Pp[i] @ H.T @ np.linalg.inv(H @ Pp[i] @ H.T + R)
+            if np.trace(Pp[i]) < 1e-6:
+                K = np.zeros((kalman_model.nx, kalman_model.nz))
+            else:
+                K = Pp[i] @ H.T @ np.linalg.inv(H @ Pp[i] @ H.T + R)
             xe[i] = xp[i] + K @ (z[i] - H @ xp[i])
             Pe[i] = (I - K @ H) @ Pp[i] @ (I - K @ H).T + K @ R @ K.T
             # Convert to result
